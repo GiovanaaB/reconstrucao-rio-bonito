@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="/static/style.css">
+
+<nav>
+
+    <a href="/">Início</a>
+    <a href="/cadastro">Cadastrar</a>
+    <a href="/logout">Sair</a>
+</nav>
+
+<div class="container">
+    <h2>Editar Área</h2>
+
+    <form method="POST">
+        <input type="text" name="nome" value="{{ area['nome'] }}" required>
+        <input type="text" name="descricao" value="{{ area['descricao'] }}" required>
+        <input type="number" name="prioridade" value="{{ area['prioridade'] }}" required>
+
+        <button type="submit">Salvar alterações</button>
+    </form>
+</div>

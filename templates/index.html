@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Áreas Danificadas - Rio Bonito</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<nav>
+    <a href="/">Início</a>
+    <a href="/cadastro">Cadastrar Área</a>
+    <a href="/logout">Sair</a>
+</nav>
+
+<h2 style="text-align:center; color:white; margin-top:20px">Áreas Danificadas</h2>
+
+<div class="container">
+    {% if areas %}
+        {% for a in areas %}
+        <div class="area-card">
+            <strong>{{ a['nome'] }}</strong><br>
+            {{ a['descricao'] }}<br><br>
+            <b>Prioridade:</b> {{ a['prioridade'] }} <br><br>
+
+            <a href="/editar/{{ a['id'] }}">
+                <button style="background:#ffaa00;">Editar</button>
+            </a>
+
+            <a href="/excluir/{{ a['id'] }}" onclick="return confirm('Tem certeza que deseja excluir?');">
+                <button style="background:#ff4444;">Excluir</button>
+            </a>
+        </div>
+        {% endfor %}
+    {% else %}
+        <p style="text-align:center; color:white;">Nenhuma área cadastrada ainda.</p>
+    {% endif %}
+</div>
+
+</body>
+</html>
+
+
