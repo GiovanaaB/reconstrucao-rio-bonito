@@ -6,13 +6,17 @@ import os
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY", "chave_insegura_trocar_no_env")
 
-
+# -------------------------------
+# Conexão com o banco
+# -------------------------------
 def get_db():
     conn = sqlite3.connect("database.db")
     conn.row_factory = sqlite3.Row
     return conn
 
-
+# -------------------------------
+# Página inicial
+# -------------------------------
 @app.route("/")
 def index():
     if "user" not in session:
@@ -24,7 +28,9 @@ def index():
 
     return render_template("index.html", areas=areas)
 
-
+# -------------------------------
+# Cadastro de áreas
+# -------------------------------
 @app.route("/cadastro", methods=["GET", "POST"])
 def cadastro():
     if "user" not in session:
@@ -47,7 +53,54 @@ def cadastro():
 
     return render_template("cadastro.html")
 
+# -------------------------------
+# Editar área
+# -------------------------------
+@app.route("/editar/<int:id>", methods=["GET", "POST"])
+def editar(id):
+    if "user" not in session:
+        return redirect("/login")
 
+    conn = get_db()
+
+    if request.method == "POST":
+        nome = request.form["nome"]
+        descricao = request.form["descricao"]
+        prioridade = request.form["prioridade"]
+
+        conn.execute("""
+            UPDATE areas
+            SET nome = ?, descricao = ?, prioridade = ?
+            WHERE id = ?
+        """, (nome, descricao, prioridade, id))
+
+        conn.commit()
+        conn.close()
+        return redirect("/")
+
+    area = conn.execute("SELECT * FROM areas WHERE id = ?", (id,)).fetchone()
+    conn.close()
+
+    return render_template("editar.html", area=area)
+
+# -------------------------------
+# Excluir área
+# -------------------------------
+@app.route("/excluir/<int:id>")
+def excluir(id):
+    if "user" not in session:
+        return redirect("/login")
+
+    conn = get_db()
+    conn.execute("DELETE FROM areas WHERE id = ?", (id,))
+    conn.commit()
+    conn.close()
+
+    return redirect("/")
+
+# -------------------------------
+# Login
+# -------------------------------
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
@@ -66,15 +119,20 @@ def login():
 
     return render_template("login.html")
 
-
+# -------------------------------
+# Logout
+# -------------------------------
 @app.route("/logout")
 def logout():
     session.pop("user", None)
     return redirect("/login")
 
-
+# -------------------------------
+# Criar tabelas
+# -------------------------------
 def criar_banco():
     conn = get_db()
+    
     conn.execute("""
         CREATE TABLE IF NOT EXISTS usuarios (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -92,6 +150,7 @@ def criar_banco():
         )
     """)
 
+    # Usuário padrão admin
     senha_hash = generate_password_hash("admin")
     try:
         conn.execute("INSERT INTO usuarios (usuario, senha) VALUES (?, ?)", ("admin", senha_hash))
@@ -101,7 +160,9 @@ def criar_banco():
     conn.commit()
     conn.close()
 
-
+# -------------------------------
+# Start do app
+# -------------------------------
 if __name__ == "__main__":
     criar_banco()
     app.run(debug=True)
